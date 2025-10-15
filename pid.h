@@ -11,20 +11,20 @@
 
 // PID Coefficients
 typedef struct {
-    int16_t kp;
-    int16_t ki;
-    int16_t kd;
+    float kp;
+    float ki;
+    float kd;
 } PID_t;
 
 // PID error tracking values
 typedef struct {
-    int16_t current_error;
-    int16_t previous_error;
-    int16_t integral;
+    float current_error;
+    float previous_error;
+    float integral;
     // previous_time variable is to track the time taken since the last PID calculation was
     // so that the d and i parts can work as they should. This isnt necessary if we use
     // an interrupt that has an exact time (then we can use a constant)
-    int16_t previous_time;
+    float previous_time;
 } PID_errors_t;
 
 // roll acceleration rate pid controller 
@@ -42,13 +42,16 @@ extern float max_roll_rate;
 extern float max_pitch_rate;
 extern float max_yaw_rate;
 
-float calculate_pid(const PID_t *pid_coeffs, PID_errors_t *errors, int16_t setpoint,
-                    int16_t current_state);
-void update_motors_from_pid(int16_t roll_output, int16_t pitch_output, int16_t yaw_output,
-                            int16_t throttle);
+float calculate_pid(const PID_t *pid_coeffs, PID_errors_t *errors, float setpoint,
+                    float current_state);
+void update_motors_from_pid(float roll_output, float pitch_output, float yaw_output,
+                            float throttle);
+
 void initialize_pid();
-void pid_control(int16_t desired_roll, int16_t desired_pitch, int16_t desired_yaw,
-                 int16_t throttle);
+void pid_control(float desired_roll, float desired_pitch, float desired_yaw,
+                 float throttle);
+
+int16_t get_time(); // placeholder
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
