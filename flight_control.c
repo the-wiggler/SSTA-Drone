@@ -1,5 +1,5 @@
 #include "flight_control.h"
-#include "pid.h"
+#include <math.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // QUATERNION LOGIC
@@ -62,14 +62,6 @@ void setThrottle(throttle_t throttle, motor_throttle_states_t *mts) {
     mts->front_right    = throttle;
     mts->rear_left      = throttle;
     mts->rear_right     = throttle;
-}
-
-
-void updateThrottleFromPID(motor_throttle_states_t *mts, orientation_correction_t oc) {
-    mts->front_left     +=  -oc.pitch + oc.roll - oc.yaw;
-    mts->front_right    +=   oc.pitch + oc.roll + oc.yaw;
-    mts->rear_left      +=   oc.pitch - oc.roll - oc.yaw;
-    mts->rear_right     +=  -oc.pitch - oc.roll + oc.yaw;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // END THROTTLE LOGIC

@@ -7,6 +7,7 @@
         "string.h": "c",
         "stdbool.h": "c",
         "flight_control.h": "c",
-        "pid.h": "c"
+        "pid.h": "c",
+        "unistd.h": "c"
     }
 }

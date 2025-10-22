@@ -2,6 +2,14 @@
 #include <stdbool.h>
 #include "pid.h"
 #include "flight_control.h"
+#include <unistd.h>
+
+void updateThrottleFromPID(motor_throttle_states_t *mts, orientation_correction_t oc) {
+    mts->front_left     +=  -oc.pitch + oc.roll - oc.yaw;
+    mts->front_right    +=   oc.pitch + oc.roll + oc.yaw;
+    mts->rear_left      +=   oc.pitch - oc.roll - oc.yaw;
+    mts->rear_right     +=  -oc.pitch - oc.roll + oc.yaw;
+}
 
 int main() {
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -12,7 +20,7 @@ int main() {
     // this variable should be changed by the PID control so each motor has a different throttlel
     // value that corresponds to its correction state (i.e front motors are higher than rear if 
     // the drone is tilted too far forward)
-    motor_throttle_states_t *throttle_states = {0}; // sets all throttle values to 0 by default at start
+    motor_throttle_states_t throttle_states = {0}; // sets all throttle values to 0? by default at start
 
     // current_attitude holds the current vector rotation (represented by quaternions) as read
     // by the sensors on the drone
@@ -33,6 +41,13 @@ int main() {
         // this transforms throttle_states into 4 different speeds that work towards the setpoint
         updateThrottleFromPID(&throttle_states, correction_factors);
 
+        printf("Front Left: %d | Front Right: %d | Rear Left: %d | Rear Right: %d\n",
+            (int)throttle_states.front_left,
+            (int)throttle_states.front_right,
+            (int)throttle_states.rear_left,
+            (int)throttle_states.rear_right);
+
+        sleep(1);
     }
     
     return 0;

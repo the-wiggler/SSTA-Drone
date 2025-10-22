@@ -1,14 +1,12 @@
 #ifndef FLIGHT_CONTROL_H
 #define FLIGHT_CONTROL_H
 
-#include "pid.h" 
-
 typedef struct {
     float w;        // scalar part of the quaternion
     float i, j, k;  // vector parts of the quaternion
 } Quaternion_vector_t;
 
-typedef uint8_t throttle_t;
+typedef unsigned char throttle_t;
 
 typedef struct {
     throttle_t front_left, front_right, rear_left, rear_right;
@@ -19,5 +17,4 @@ Quaternion_vector_t quaternion_multiply(Quaternion_vector_t q1, Quaternion_vecto
 Quaternion_vector_t quaternion_normalize(Quaternion_vector_t q);
 
 void setThrottle(throttle_t throttle, motor_throttle_states_t *mts);
-void updateThrottleFromPID(motor_throttle_states_t *mts, orientation_correction_t oc);
 #endif
