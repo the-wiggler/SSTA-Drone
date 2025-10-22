@@ -1,11 +1,25 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// REFERENCE INFORMATION
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Quaternion multiplication rules:
+// i^2 = j^2 = k^2 = -1
+// ij = -ji = k
+// jk = -kj = i
+// ki = -ki = j
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// END REFERENCE INFORMATION
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include "pid.h"
 #include <string.h>
 #include <math.h>
 #include <stdint.h>
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// PID tuning coefficients
+// PID TUNING COEFFICIENTS
+////////////////////////////////////////////////////////////////////////////////////////////////////
 PID_t PID_COEFFS = {50, 50, 15};
 
 
@@ -17,54 +31,7 @@ PID_errors_t attitude_errors = {
     .previous_time  = 0.0f
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// QUATERNION LOGIC
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// quaternion conjugate (inverse for unit quaternions)
-// to calculate the error between two orientations, you need to "undo" the current rotation and apply the desired rotation. 
-// the conjugate represents that "undo" operation
-Quaternion_vector_t quaternion_conjugate(Quaternion_vector_t q) {
-    Quaternion_vector_t q_conj;
-    q_conj.w = q.w;
-    q_conj.i = -q.i;
-    q_conj.j = -q.j;
-    q_conj.k = -q.k;
-    return q_conj;
-}
-
-
-// quaternion multiplication
-// result = q1 * q2
-// this combines two rotations into one
-// if you rotate by q1 then by q2, the combined rotation is q2×q1
-Quaternion_vector_t quaternion_multiply(Quaternion_vector_t q1, Quaternion_vector_t q2) {
-    Quaternion_vector_t result;
-    
-    result.w = q1.w * q2.w - q1.i * q2.i - q1.j * q2.j - q1.k * q2.k;
-    result.i = q1.w * q2.i + q1.i * q2.w + q1.j * q2.k - q1.k * q2.j;
-    result.j = q1.w * q2.j - q1.i * q2.k + q1.j * q2.w + q1.k * q2.i;
-    result.k = q1.w * q2.k + q1.i * q2.j - q1.j * q2.i + q1.k * q2.w;
-    
-    return result;
-}
-
-// normalize quaternion
-// sometimes the unit vectors get a bit off from 1 because floating point math is bad, so we have
-// to fix that by normalizing them again
-Quaternion_vector_t quaternion_normalize(Quaternion_vector_t q) {
-    float norm = sqrtf(q.w * q.w + q.i * q.i + q.j * q.j + q.k * q.k);
-    
-    q.w /= norm;
-    q.i /= norm;
-    q.j /= norm;
-    q.k /= norm;
-    
-    return q;
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// END QUATERNION LOGIC
+// END PID TUNING COEFFICIENTS
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,11 +50,10 @@ Quaternion_vector_t quaternion_normalize(Quaternion_vector_t q) {
 //      rear-right motor: throttle + pitch + roll + yaw
 //      rear-left motor: throttle + pitch - roll - yaw
 //      front-left motor: throttle - pitch - roll + yaw
-orientation_correction calculate_pid(PID_t pid_coeffs, PID_errors_t *errors, Quaternion_vector_t setpoint, 
-                                                                Quaternion_vector_t current_state) {  
+orientation_correction_t calculatePid(Quaternion_vector_t setpoint, Quaternion_vector_t current_state) {  
     float current_time = get_time();
-    float delta_time = current_time - errors->previous_time;
-    errors->previous_time = current_time;
+    float delta_time = current_time - attitude_errors.previous_time;
+    attitude_errors.previous_time = current_time;
 
     // step 1: calculate the quaterion error
     // q_error = q_setpoint * q_current^(-1)
@@ -98,34 +64,34 @@ orientation_correction calculate_pid(PID_t pid_coeffs, PID_errors_t *errors, Qua
 
     // step 2: write the vector part of error quaternion for PID control
     // this approximates the angular error
-    errors->current_error = q_error;
+    attitude_errors.current_error = q_error;
 
     // step 3: calculate proportional term
-    float P_i = pid_coeffs.kp * q_error.i;
-    float P_j = pid_coeffs.kp * q_error.j;
-    float P_k = pid_coeffs.kp * q_error.k;
+    float P_i = PID_COEFFS.kp * q_error.i;
+    float P_j = PID_COEFFS.kp * q_error.j;
+    float P_k = PID_COEFFS.kp * q_error.k;
 
     // step 4: calculate integral term
     // ntegrate error over time
-    errors->integral.i += q_error.i * delta_time;
-    errors->integral.j += q_error.j * delta_time;
-    errors->integral.k += q_error.k * delta_time;
-    float I_i = pid_coeffs.ki * errors->integral.i;
-    float I_j = pid_coeffs.ki * errors->integral.j;
-    float I_k = pid_coeffs.ki * errors->integral.k;
+    attitude_errors.integral.i += q_error.i * delta_time;
+    attitude_errors.integral.j += q_error.j * delta_time;
+    attitude_errors.integral.k += q_error.k * delta_time;
+    float I_i = PID_COEFFS.ki * attitude_errors.integral.i;
+    float I_j = PID_COEFFS.ki * attitude_errors.integral.j;
+    float I_k = PID_COEFFS.ki * attitude_errors.integral.k;
 
     // step 5: calculate the derivative term
-    float derivative_i = (q_error.i - errors->previous_error.i) / delta_time;
-    float derivative_j = (q_error.j - errors->previous_error.j) / delta_time;
-    float derivative_k = (q_error.k - errors->previous_error.k) / delta_time;
-    float D_i = pid_coeffs.kd * derivative_i;
-    float D_j = pid_coeffs.kd * derivative_j;
-    float D_k = pid_coeffs.kd * derivative_k;
+    float derivative_i = (q_error.i - attitude_errors.previous_error.i) / delta_time;
+    float derivative_j = (q_error.j - attitude_errors.previous_error.j) / delta_time;
+    float derivative_k = (q_error.k - attitude_errors.previous_error.k) / delta_time;
+    float D_i = PID_COEFFS.kd * derivative_i;
+    float D_j = PID_COEFFS.kd * derivative_j;
+    float D_k = PID_COEFFS.kd * derivative_k;
 
     // step 6: update the previous errors for the next iteration
-    errors->previous_error = q_error;
+    attitude_errors.previous_error = q_error;
 
-    orientation_correction output;
+    orientation_correction_t output;
     output.roll = P_i + I_i + D_i;   // roll
     output.pitch = P_j + I_j + D_j;  // pirch
     output.yaw = P_k + I_k + D_k;    // yaw

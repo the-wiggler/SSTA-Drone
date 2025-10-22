@@ -26,23 +26,9 @@ typedef struct {
     float roll;     // i-axis correction
     float pitch;    // j-axis correction
     float yaw;      // k-axis correction
-} orientation_correction;
+} orientation_correction_t;
 
-// attitude change rate pid controller 
-extern PID_t attitude_pid;
-
-// roll acceleration rate pid error values 
-extern Quaternion_vector_t current_attitude;
-extern PID_errors_t attitude_errors;
-
-
-orientation_correction calculate_pid(PID_t pid_coeffs, PID_errors_t *errors, Quaternion_vector_t setpoint, Quaternion_vector_t current_state);
-void update_motors_from_pid(float roll_output, float pitch_output,
-                            float yaw_output, float throttle);
-
-void initialize_pid();
-void pid_control(float desired_roll, float desired_pitch, 
-                 float desired_yaw, float throttle);
+orientation_correction_t calculatePid(Quaternion_vector_t setpoint, Quaternion_vector_t current_state);
 
 int16_t get_time(); // placeholder
 

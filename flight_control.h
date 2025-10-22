@@ -8,13 +8,16 @@ typedef struct {
     float i, j, k;  // vector parts of the quaternion
 } Quaternion_vector_t;
 
+typedef uint8_t throttle_t;
+
 typedef struct {
-    uint8_t front_left, front_right, rear_left, rear_right;
+    throttle_t front_left, front_right, rear_left, rear_right;
 } motor_throttle_states_t;
 
-// struct variable that holds the throttle values for each motor
-extern motor_throttle_states_t throttle_states;
+Quaternion_vector_t quaternion_conjugate(Quaternion_vector_t q);
+Quaternion_vector_t quaternion_multiply(Quaternion_vector_t q1, Quaternion_vector_t q2);
+Quaternion_vector_t quaternion_normalize(Quaternion_vector_t q);
 
-void setThrottle(uint8_t throttle);
-
+void setThrottle(throttle_t throttle, motor_throttle_states_t *mts);
+void updateThrottleFromPID(motor_throttle_states_t *mts, orientation_correction_t oc);
 #endif

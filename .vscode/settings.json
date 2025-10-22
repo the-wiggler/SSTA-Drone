@@ -6,6 +6,7 @@
         "stdint.h": "c",
         "string.h": "c",
         "stdbool.h": "c",
-        "flight_control.h": "c"
+        "flight_control.h": "c",
+        "pid.h": "c"
     }
 }
