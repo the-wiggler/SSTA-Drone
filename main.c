@@ -73,16 +73,11 @@ int main() {
     // use the right hand rule to determine the angles of orientation (rolling clockwise is positive, pitching nose up is positive, yawing left is positive)
     Quaternion_vector_t current_attitude = {1.0f, 0.0f, 0.0f, 0.0f}; // sets the default position as having zero rotation about the world axis
 
-    // test to set a different roll angle than the setpoint:
-    float pitch_angle = 0.1745f; // +10 degrees in radians (pitch forward/down)
-
-    current_attitude.w = cosf(pitch_angle / 2.0f);
-    current_attitude.i = 0.0f;  // no roll
-    current_attitude.j = sinf(pitch_angle / 2.0f);  // pitch rotation
-    current_attitude.k = 0.0f;  // no yaw
-
     // setpoint holds the current goal setpoint for each iteration, i.e. what vector angle the drone wants to achieve
     Quaternion_vector_t setpoint_attitude = {1.0f, 0.0f, 0.0f, 0.0f}; // sets the default setpoint as having zero rotation about the world axis (level)
+
+    // test to set a different roll angle than the setpoint:
+    writeAngleToVector(0.5f, 0.5f, 0.0f, &current_attitude);
     
     // flight control loop
     while (!system_fail) {

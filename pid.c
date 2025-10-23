@@ -45,10 +45,10 @@ orientation_correction_t calculatePid(Quaternion_vector_t setpoint, Quaternion_v
 
     // step 1: calculate the quaterion error
     // q_error = q_setpoint * q_current^(-1)
-    Quaternion_vector_t current_conj = quaternion_conjugate(current_state);
-    Quaternion_vector_t q_error = quaternion_multiply(setpoint, current_conj);
+    Quaternion_vector_t current_conj = quaternionConjugate(current_state);
+    Quaternion_vector_t q_error = quaternionMultiply(setpoint, current_conj);
     // normalize the error quaternion
-    q_error = quaternion_normalize(q_error);
+    q_error = quaternionNormalize(q_error);
 
     // step 2: write the vector part of error quaternion for PID control
     // this approximates the angular error
