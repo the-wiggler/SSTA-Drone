@@ -22,12 +22,6 @@ typedef struct {
     float previous_time;
 } PID_errors_t;
 
-typedef struct {
-    float roll;     // i-axis correction
-    float pitch;    // j-axis correction
-    float yaw;      // k-axis correction
-} orientation_correction_t;
-
 orientation_correction_t calculatePid(Quaternion_vector_t setpoint, Quaternion_vector_t current_state, long time, PID_errors_t error_storage);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

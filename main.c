@@ -25,25 +25,6 @@ void initTimer() {
 double timeSinceStart() {
     return ((double)(clock() - start_time)) / CLOCKS_PER_SEC;
 }
-
-// THROTTLE PID CORRECTION FUNCTION
-void updateThrottleFromPID(motor_throttle_states_t *mts, orientation_correction_t oc) {
-    // average of all motors to preserve total thrust
-    float base_throttle = (mts->front_left + mts->front_right + 
-                           mts->rear_left + mts->rear_right) / 4.0f;
-    
-    // apply corrections according to motor mixing equation:
-    float fl = base_throttle + oc.pitch + oc.roll + oc.yaw;
-    float fr = base_throttle + oc.pitch - oc.roll - oc.yaw;
-    float rl = base_throttle - oc.pitch + oc.roll - oc.yaw;
-    float rr = base_throttle - oc.pitch - oc.roll + oc.yaw;
-    
-    // clamp the values to valid throttle range
-    mts->front_left     = (throttle_t)fmaxf(0.0f, fminf(255.0f, fl));
-    mts->front_right    = (throttle_t)fmaxf(0.0f, fminf(255.0f, fr));
-    mts->rear_left      = (throttle_t)fmaxf(0.0f, fminf(255.0f, rl));
-    mts->rear_right     = (throttle_t)fmaxf(0.0f, fminf(255.0f, rr));
-}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // END HELPER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////////////////////////
