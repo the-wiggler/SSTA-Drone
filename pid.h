@@ -28,10 +28,9 @@ typedef struct {
     float yaw;      // k-axis correction
 } orientation_correction_t;
 
-orientation_correction_t calculatePid(Quaternion_vector_t setpoint, Quaternion_vector_t current_state);
-
-int16_t get_time(); // placeholder
+orientation_correction_t calculatePid(Quaternion_vector_t setpoint, Quaternion_vector_t current_state, long time, PID_errors_t error_storage);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 #endif
