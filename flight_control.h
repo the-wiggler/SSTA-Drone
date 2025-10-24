@@ -20,6 +20,12 @@ typedef struct {
     float yaw;      // k-axis correction
 } orientation_correction_t;
 
+typedef struct {
+    float roll_rate;
+    float pitch_rate;
+    float yaw_rate;
+} angular_velocity_t;
+
 Quaternion_vector_t quaternionConjugate(Quaternion_vector_t q);
 Quaternion_vector_t quaternionMultiply(Quaternion_vector_t q1, Quaternion_vector_t q2);
 Quaternion_vector_t quaternionNormalize(Quaternion_vector_t q);

@@ -1,10 +1,10 @@
 #include <stdio.h>
-#include <stdbool.h>
+#include <time.h>
 #include "pid.h"
 #include "flight_control.h"
+#include <stdbool.h>
 #include <unistd.h>
-#include <math.h>
-#include <time.h>
+#include <string.h>
 //NOTE: ALL COORDINATE SYSTEM AXES ARE DEFINED AS FOLLOWS FOR THIS DRONE:
 // AS VIEWED FROM THE DIRECT BACK OF THE DRONE
 // THE POSITIVE ROLL AXIS POINTS THROUGH TOWARDS THE FRONT OF THE DRONE
@@ -37,6 +37,18 @@ PID_errors_t attitude_errors = {
     .integral       = {0.0f, 0.0f, 0.0f, 0.0f},
     .previous_time  = 0.0f
 };
+PID_rate_errors_t rate_errors = {
+    .current_error_roll = 0.0f,
+    .current_error_pitch = 0.0f,
+    .current_error_yaw = 0.0f,
+    .previous_error_roll = 0.0f,
+    .previous_error_pitch = 0.0f,
+    .previous_error_yaw = 0.0f,
+    .integral_roll = 0.0f,
+    .integral_pitch = 0.0f,
+    .integral_yaw = 0.0f,
+    .previous_time = 0.0f
+};
 
 
 int main() {
@@ -55,20 +67,28 @@ int main() {
     // by the sensors on the drone
     // use the right hand rule to determine the angles of orientation (rolling clockwise is positive, pitching nose up is positive, yawing left is positive)
     Quaternion_vector_t current_attitude = {1.0f, 0.0f, 0.0f, 0.0f}; // sets the default position as having zero rotation about the world axis
-
     // setpoint holds the current goal setpoint for each iteration, i.e. what vector angle the drone wants to achieve
     Quaternion_vector_t setpoint_attitude = {1.0f, 0.0f, 0.0f, 0.0f}; // sets the default setpoint as having zero rotation about the world axis (level)
 
-    // test to set a different roll angle than the setpoint:
-    writeAngleToVector(0.5f, 0.5f, 0.0f, &current_attitude);
+    // current angular velocity from the gyroscope sensor
+    // holds data in radians per second (rad/s)
+    // these are NOT represented with quaternions, but roll, pitch, and yaw
+    angular_velocity_t current_angular_v = {0.0f, 0.0f, 0.0f};
+
+
+    // test to set a different roll angle than the setpoint to see the correction take place!
+    writeAngleToVector(0.2f, 0.0f, 0.0f, &current_attitude);
     
     // flight control loop
     while (!system_fail) {
         // at the beginning, we start with what the initial throttle input value is
         setThrottle(100, &throttle_states); // sets all values in throttle_states to a value
 
-        // creates a variable that holds the roll, pitch, and yaw correction values based on the PID calculation
-        orientation_correction_t correction_factors = calculatePid(setpoint_attitude, current_attitude, timeSinceStart(), attitude_errors);
+        // PD attitude correction
+        angular_velocity_t desired_angular_v = calculateAttitudePID(setpoint_attitude, current_attitude, timeSinceStart(), &attitude_errors);
+
+        // PID roll rate correction
+        orientation_correction_t correction_factors = calculateRatePID(desired_angular_v, current_angular_v, timeSinceStart(), &rate_errors);
 
         // applies the correction to the current throttle values
         // this transforms throttle_states into 4 different speeds that work towards the setpoint
@@ -80,7 +100,8 @@ int main() {
             (int)throttle_states.rear_left,
             (int)throttle_states.rear_right);
 
-        sleep(1);
+        if (timeSinceStart() > 5.0f) writeAngleToVector(0.0f, 0.0f, 0.0f, &current_attitude);
+        //sleep(1);
     }
     
     return 0;
