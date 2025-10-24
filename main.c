@@ -100,8 +100,7 @@ int main() {
             (int)throttle_states.rear_left,
             (int)throttle_states.rear_right);
 
-        if (timeSinceStart() > 5.0f) writeAngleToVector(0.0f, 0.0f, 0.0f, &current_attitude);
-        //sleep(1);
+        sleep(1);
     }
     
     return 0;
