@@ -6,6 +6,9 @@ axis equal;
 xlim([-2 2]); ylim([-2 2]); zlim([0 4]);
 xlabel('X'); ylabel('Y'); zlabel('Z');
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% CONSTANTS AND INITIAL SETPOINTS/ATTITUDE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 G = -9.81; % GRAVITATIONAL ACCELERATION
 
 % set the initial position and rotation variables
@@ -32,11 +35,15 @@ throttle_FL = 0;
 throttle_RL = 0;
 throttle_RR = 0; % throttle vals are 0-255
 
-THROTTLE_TO_THRUST_COEFFICIENT = 0.001;
+THROTTLE_TO_THRUST_COEFFICIENT = 0.001; % multiply by this value to convert RPM to motor thrust force (N)
 DRONE_MASS = 1.0; % (in kg)
 
 drone_x_direction_initial = [1, 0, 0]; % pointing along the x axis
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% INITIALIZE DRONE BODY IN THE SIMULATION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % define the motor positions relative to the center of mass
 motor_distance = 0.4; % distance from center to each motor
 motor_positions_initial = [
@@ -57,7 +64,11 @@ motor4 = plot3(motor_positions_initial(4,1), motor_positions_initial(4,2), pos_z
 
 arrow_length = 0.4;
 front_arrow = quiver3(pos_x, pos_y, pos_z, arrow_length, 0, 0, 0, 'LineWidth', 2, 'Color', 'r', 'MaxHeadSize', 0.5);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SIMULATION LOOP
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 iteration_counter = 0;
 sim_running = true;
 previous_time = 0;
@@ -112,3 +123,4 @@ while sim_running == true
     
     iteration_counter = iteration_counter + 1;
 end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
