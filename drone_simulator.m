@@ -121,6 +121,6 @@ while sim_running == true
     
     drawnow;
     
-    iteration_counter = iteration_counter + 1;
+    iteration_counter = iteration_counter + 1
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

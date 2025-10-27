@@ -3,20 +3,49 @@ hold on;
 grid on;
 view(3);
 axis equal;
-xlim([-10 10]); ylim([-10 10]); zlim([0 20]);
+xlim([-2 2]); ylim([-2 2]); zlim([0 4]);
 xlabel('X'); ylabel('Y'); zlabel('Z');
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% CONSTANTS AND INITIAL SETPOINTS/ATTITUDE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+G = -9.81; % GRAVITATIONAL ACCELERATION
+
 % set the initial position and rotation variables
+% positions in the world
 pos_x = 0;
 pos_y = 0;
-pos_z = 0;
+pos_z = 1;
+% attitude
 roll = 0;
 pitch = 0;
 yaw = 0;
+% relative velocity
+vel_x = 0;
+vel_y = 0;
+vel_z = 0;
+% angular velocity
+omega_roll = 0;
+omega_pitch = 0;
+omega_yaw = 0;
+
+% throttle values
+throttle_FR = 0;
+throttle_FL = 0;
+throttle_RL = 0;
+throttle_RR = 0; % throttle vals are 0-255
+
+THROTTLE_TO_THRUST_COEFFICIENT = 0.001; % multiply by this value to convert RPM to motor thrust force (N)
+DRONE_MASS = 1.0; % (in kg)
 
 drone_x_direction_initial = [1, 0, 0]; % pointing along the x axis
-% defi motor positions relative to center (quadcopter X configuration)
-motor_distance = 3; % distance from center to each motor
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% INITIALIZE DRONE BODY IN THE SIMULATION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% define the motor positions relative to the center of mass
+motor_distance = 0.4; % distance from center to each motor
 motor_positions_initial = [
     motor_distance/sqrt(2), motor_distance/sqrt(2), 0;    % FR motor
     -motor_distance/sqrt(2), motor_distance/sqrt(2), 0;   % FL motor
@@ -25,22 +54,34 @@ motor_positions_initial = [
 ];
 
 % create initial plot objects
-drone_center = plot3(pos_x, pos_y, pos_z, 'ro', 'MarkerSize', 5, 'MarkerFaceColor', 'r');
+drone_center = plot3(pos_x, pos_y, pos_z, 'ro', 'MarkerSize', 3, 'MarkerFaceColor', 'r');
 
-% Create motor plot objects (blue circles)
-motor1 = plot3(motor_positions_initial(1,1), motor_positions_initial(1,2), pos_z, 'bo', 'MarkerSize', 5, 'MarkerFaceColor', 'b');
-motor2 = plot3(motor_positions_initial(2,1), motor_positions_initial(2,2), pos_z, 'bo', 'MarkerSize', 5, 'MarkerFaceColor', 'b');
-motor3 = plot3(motor_positions_initial(3,1), motor_positions_initial(3,2), pos_z, 'bo', 'MarkerSize', 5, 'MarkerFaceColor', 'b');
-motor4 = plot3(motor_positions_initial(4,1), motor_positions_initial(4,2), pos_z, 'bo', 'MarkerSize', 5, 'MarkerFaceColor', 'b');
+% create the motor plot objects (blue circles)
+motor1 = plot3(motor_positions_initial(1,1), motor_positions_initial(1,2), pos_z, 'go', 'MarkerSize', 3);
+motor2 = plot3(motor_positions_initial(2,1), motor_positions_initial(2,2), pos_z, 'go', 'MarkerSize', 3);
+motor3 = plot3(motor_positions_initial(3,1), motor_positions_initial(3,2), pos_z, 'go', 'MarkerSize', 3);
+motor4 = plot3(motor_positions_initial(4,1), motor_positions_initial(4,2), pos_z, 'go', 'MarkerSize', 3);
 
-arrow_length = 2;
+arrow_length = 0.4;
 front_arrow = quiver3(pos_x, pos_y, pos_z, arrow_length, 0, 0, 0, 'LineWidth', 2, 'Color', 'r', 'MaxHeadSize', 0.5);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SIMULATION LOOP
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 iteration_counter = 0;
 sim_running = true;
+previous_time = 0;
+current_time = 0;
 
 while sim_running == true
-    % calculate quaternion from current Euler angles
+    if iteration_counter == 0
+    tic;
+    end
+    delta_time = toc;
+    tic;
+
+    % calculate quaternion from current euler angles
     q_roll = quaternion(cos(roll / 2), sin(roll / 2), 0, 0);
     q_pitch = quaternion(cos(pitch / 2), 0, sin(pitch / 2), 0);
     q_yaw = quaternion(cos(yaw / 2), 0, 0, sin(yaw / 2));
@@ -64,15 +105,27 @@ while sim_running == true
     % update arrows
     set(front_arrow, 'XData', pos_x, 'YData', pos_y, 'ZData', pos_z, 'UData', drone_front_direction(1)*arrow_length, 'VData', drone_front_direction(2)*arrow_length, 'WData', drone_front_direction(3)*arrow_length);
     
+    if iteration_counter > 1000 && iteration_counter < 1100
+        vel_z = 3;
+    end
+
+    % update drone velocity based on gravitational acceleration
+    vel_z = vel_z + G * delta_time;
+
+    pos_x = pos_x + vel_x * delta_time;
+    pos_y = pos_y + vel_y * delta_time;
+    if pos_z > 0
+        pos_z = pos_z + vel_z * delta_time;
+    else
+        pos_z = 0; % keeps it from going below the datum
+    end
+
+
+    previous_time = current_time;
+    
     drawnow;
     
-    % increment the position and orientation
-    pos_z = pos_z + 0.1;
-    yaw = yaw + 0.01;
-    pitch = pitch + 0.01;
-    
     iteration_counter = iteration_counter + 1;
-    if iteration_counter == 150
-        sim_running = false;
-    end
+    ite
 end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
