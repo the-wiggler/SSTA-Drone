@@ -1,10 +1,8 @@
-#include <stdio.h>
-#include <time.h>
+#include <stm32f4xx_hal.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include "pid.h"
 #include "flight_control.h"
-#include <stdbool.h>
-#include <unistd.h>
-#include <string.h>
 //NOTE: ALL COORDINATE SYSTEM AXES ARE DEFINED AS FOLLOWS FOR THIS DRONE:
 // AS VIEWED FROM THE DIRECT BACK OF THE DRONE
 // THE POSITIVE ROLL AXIS POINTS THROUGH TOWARDS THE FRONT OF THE DRONE
@@ -20,13 +18,18 @@
 // HELPER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // TIME FUNCTIONS
-static clock_t start_time;
+// configure system clock
+void SystemClock_Config(void);
+
+static uint32_t start_time;
+
 void initTimer() {
-    start_time = clock();
+    start_time = HAL_GetTick();
 }
 double timeSinceStart() {
-    return ((double)(clock() - start_time)) / CLOCKS_PER_SEC;
+    return (double)(HAL_GetTick() - start_time) / 1000.0; // returns time in seconds
 }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // END HELPER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,10 +52,15 @@ PID_rate_errors_t rate_errors = {
     .integral_yaw = 0.0f,
     .previous_time = 0.0f
 };
-
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*///
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int main() {
     ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Initialize HAL and the system clock
+    HAL_Init();
+    SystemClock_Config();
+
     bool system_fail = false;
     initTimer();
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -84,6 +92,10 @@ int main() {
         // at the beginning, we start with what the initial throttle input value is
         setThrottle(100, &throttle_states); // sets all values in throttle_states to a value
 
+        // TO DO: read the actual sensor data here
+        // current_attitude = readIMU();
+        // current_angular_v = readGyro();
+
         // PD attitude correction
         angular_velocity_t desired_angular_v = calculateAttitudePID(setpoint_attitude, current_attitude, timeSinceStart(), &attitude_errors);
 
@@ -94,14 +106,45 @@ int main() {
         // this transforms throttle_states into 4 different speeds that work towards the setpoint
         updateThrottleFromPID(&throttle_states, correction_factors);
 
-        printf("Front Left: %d | Front Right: %d | Rear Left: %d | Rear Right: %d\n",
-            (int)throttle_states.front_left,
-            (int)throttle_states.front_right,
-            (int)throttle_states.rear_left,
-            (int)throttle_states.rear_right);
+        // TO DO: output motor values via PWM
+        // setMotorPWM(throttle_states);
 
-        sleep(1);
+        HAL_Delay(10);
     }
     
     return 0;
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*///
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// system clock config for STM32F405
+void SystemClock_Config(void) {
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+    __HAL_RCC_PWR_CLK_ENABLE();
+    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLM = 8;
+    RCC_OscInitStruct.PLL.PLLN = 336;
+    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    RCC_OscInitStruct.PLL.PLLQ = 7;
+    HAL_RCC_OscConfig(&RCC_OscInitStruct);
+
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                                |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+    HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
+}
+
+void SysTick_Handler(void) {
+    HAL_IncTick();
 }
