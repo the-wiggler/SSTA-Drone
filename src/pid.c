@@ -110,7 +110,9 @@ orientation_correction_t calculateRatePID(angular_velocity_t desired_rate, angul
 
     // step 3: integral term
     float integral_deadzone = 0.02f;
-    float I_roll, I_pitch, I_yaw = 0.0f;
+    float I_roll    = 0.0f; 
+    float I_pitch   = 0.0f;
+    float I_yaw     = 0.0f;
     if (fabsf(error_roll) < integral_deadzone) {
         error_storage->integral_roll = 0.0f;
     } else {
@@ -145,9 +147,9 @@ orientation_correction_t calculateRatePID(angular_velocity_t desired_rate, angul
 
     // step 6: calc final output motoro corrections
     orientation_correction_t output;
-    output.roll = P_roll + I_roll + D_roll;
-    output.pitch = P_pitch + I_pitch + D_pitch;
-    output.yaw = P_yaw + I_yaw + D_yaw;
+    output.roll =   P_roll  + I_roll    + D_roll;
+    output.pitch =  P_pitch + I_pitch   + D_pitch;
+    output.yaw =    P_yaw   + I_yaw     + D_yaw;
 
     return output;
 }

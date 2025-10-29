@@ -8,6 +8,8 @@
         "stdbool.h": "c",
         "flight_control.h": "c",
         "pid.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "stm32f4xx_hal.h": "c",
+        "speedybeef405v3_pinout.h": "c"
     }
 }

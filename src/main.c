@@ -109,7 +109,7 @@ int main() {
         // TO DO: output motor values via PWM
         // setMotorPWM(throttle_states);
 
-        HAL_Delay(10);
+        HAL_Delay(100000);
     }
     
     return 0;

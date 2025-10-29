@@ -2,6 +2,8 @@
 #define FLIGHT_CONTROL_H
 
 #include <stdbool.h>
+#include <stm32f4xx_hal.h>
+#include "SPEEDYBEEF405V3_PINOUT.h"
 
 typedef struct {
     float w;        // scalar part of the quaternion
