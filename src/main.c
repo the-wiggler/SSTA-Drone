@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "pid.h"
 #include "flight_control.h"
+#include "STM32405_config.h"
 //NOTE: ALL COORDINATE SYSTEM AXES ARE DEFINED AS FOLLOWS FOR THIS DRONE:
 // AS VIEWED FROM THE DIRECT BACK OF THE DRONE
 // THE POSITIVE ROLL AXIS POINTS THROUGH TOWARDS THE FRONT OF THE DRONE
@@ -20,15 +21,14 @@
 // TIME FUNCTIONS
 // configure system clock
 void SystemClock_Config(void);
-
 static uint32_t start_time;
-
 void initTimer() {
     start_time = HAL_GetTick();
 }
 double timeSinceStart() {
     return (double)(HAL_GetTick() - start_time) / 1000.0; // returns time in seconds
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // END HELPER FUNCTIONS
@@ -65,7 +65,6 @@ int main() {
     initTimer();
     ////////////////////////////////////////////////////////////////////////////////////////////////
     FC_LEDInit();
-
     // throttle_states holds the initial throttle values sent to the motors. Each value inside of
     // this variable should be changed by the PID control so each motor has a different throttlel
     // value that corresponds to its correction state (i.e front motors are higher than rear if 
@@ -86,10 +85,11 @@ int main() {
 
 
     // test to set a different roll angle than the setpoint to see the correction take place!
-    writeAngleToVector(0.2f, 0.0f, 0.0f, &current_attitude);
+    //writeAngleToVector(0.2f, 0.0f, 0.0f, &current_attitude);
     
     // flight control loop
     while (!system_fail) {
+        HAL_GPIO_TogglePin(LED_PORT, LED_PIN);
         // at the beginning, we start with what the initial throttle input value is
         setThrottle(100, &throttle_states); // sets all values in throttle_states to a value
 

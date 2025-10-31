@@ -1,6 +1,8 @@
 #include "flight_control.h"
+#include <stdbool.h>
+#include <stm32f4xx_hal.h>
+#include "STM32405_config.h"
 #include <math.h>
-#include "SPEEDYBEEF405V3_PINOUT.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // QUATERNION LOGIC
