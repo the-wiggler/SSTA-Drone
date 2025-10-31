@@ -35,4 +35,6 @@ void writeAngleToVector(float roll, float pitch, float yaw, Quaternion_vector_t 
 
 void setThrottle(throttle_t throttle, motor_throttle_states_t *mts);
 void updateThrottleFromPID(motor_throttle_states_t *mts, orientation_correction_t oc);
+
+void FC_LEDInit(void);
 #endif
