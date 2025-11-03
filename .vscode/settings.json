@@ -10,6 +10,11 @@
         "pid.h": "c",
         "unistd.h": "c",
         "stm32f4xx_hal.h": "c",
-        "speedybeef405v3_pinout.h": "c"
+        "speedybeef405v3_pinout.h": "c",
+        "stm32405_config.h": "c",
+        "usb_device.h": "c",
+        "usbd_cdc_if.h": "c",
+        "usbd_cdc.h": "c",
+        "debug.h": "c"
     }
 }

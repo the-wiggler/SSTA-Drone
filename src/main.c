@@ -4,6 +4,7 @@
 #include "pid.h"
 #include "flight_control.h"
 #include "STM32405_config.h"
+#include "debug.h"
 //NOTE: ALL COORDINATE SYSTEM AXES ARE DEFINED AS FOLLOWS FOR THIS DRONE:
 // AS VIEWED FROM THE DIRECT BACK OF THE DRONE
 // THE POSITIVE ROLL AXIS POINTS THROUGH TOWARDS THE FRONT OF THE DRONE
@@ -58,13 +59,13 @@ PID_rate_errors_t rate_errors = {
 
 int main() {
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Initialize HAL and the system clock
+    // Initialize HAL and other such system things
     HAL_Init();
     SystemClock_Config();
     bool system_fail = false;
-    initTimer();
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    initTimer();    ////////////////////////////////////////////////////////////////////////////////////////////////
     FC_LEDInit();
+    debugInit();
     // throttle_states holds the initial throttle values sent to the motors. Each value inside of
     // this variable should be changed by the PID control so each motor has a different throttlel
     // value that corresponds to its correction state (i.e front motors are higher than rear if 
@@ -82,6 +83,8 @@ int main() {
     // holds data in radians per second (rad/s)
     // these are NOT represented with quaternions, but roll, pitch, and yaw
     angular_velocity_t current_angular_v = {0.0f, 0.0f, 0.0f};
+
+    debugPrint("hello!");
 
 
     // test to set a different roll angle than the setpoint to see the correction take place!
