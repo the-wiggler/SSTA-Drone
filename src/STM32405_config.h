@@ -6,7 +6,7 @@
 #ifndef SPEEDYBEEF405V3_PINOUT_H
 #define SPEEDYBEEF405V3_PINOUT_H
 
-#include "stm32f4xx_hal.h"
+#include <stm32f4xx_hal.h>
 
 /* ========== GPIO Pin Definitions ========== */
 
@@ -188,9 +188,6 @@
 
 #define MAG_I2C_BUS         I2C2
 #define BARO_I2C_BUS        I2C2
-
-/* ========== Hardware Configuration ========== */
-//#define HSE_VALUE           8000000U  /* 8 MHz external crystal */
 
 /* IMU Configuration */
 #define USE_GYRO_BMI270

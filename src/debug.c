@@ -24,3 +24,7 @@ void debugInit(void) {
     huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
     HAL_UART_Init(&huart1);
 }
+
+void debugPrint() {
+    
+}

@@ -1,8 +1,8 @@
+#include "STM32405_config.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include "pid.h"
 #include "flight_control.h"
-#include "STM32405_config.h"
 #include "debug.h"
 //NOTE: ALL COORDINATE SYSTEM AXES ARE DEFINED AS FOLLOWS FOR THIS DRONE:
 // AS VIEWED FROM THE DIRECT BACK OF THE DRONE
