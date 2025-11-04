@@ -1,4 +1,3 @@
-#include <stm32f4xx_hal.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include "pid.h"
@@ -84,8 +83,8 @@ int main() {
     // these are NOT represented with quaternions, but roll, pitch, and yaw
     angular_velocity_t current_angular_v = {0.0f, 0.0f, 0.0f};
 
-    debugPrint("hello!");
-
+    uint8_t* msg = "hello!\n";
+    HAL_UART_Transmit(&huart1, msg, 7, 50);
 
     // test to set a different roll angle than the setpoint to see the correction take place!
     //writeAngleToVector(0.2f, 0.0f, 0.0f, &current_attitude);
@@ -106,7 +105,7 @@ int main() {
         // PID roll rate correction
         orientation_correction_t correction_factors = calculateRatePID(desired_angular_v, current_angular_v, timeSinceStart(), &rate_errors);
 
-        // applies the correction to the current throttle values
+        // applies the correction to th e current throttle values
         // this transforms throttle_states into 4 different speeds that work towards the setpoint
         updateThrottleFromPID(&throttle_states, correction_factors);
 

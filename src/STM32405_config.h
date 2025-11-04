@@ -190,7 +190,7 @@
 #define BARO_I2C_BUS        I2C2
 
 /* ========== Hardware Configuration ========== */
-#define HSE_VALUE           8000000U  /* 8 MHz external crystal */
+//#define HSE_VALUE           8000000U  /* 8 MHz external crystal */
 
 /* IMU Configuration */
 #define USE_GYRO_BMI270

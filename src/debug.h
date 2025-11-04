@@ -6,6 +6,5 @@
 UART_HandleTypeDef huart1;
 
 void debugInit(void);
-void debugPrint(const char *format, ...);
 
 #endif
