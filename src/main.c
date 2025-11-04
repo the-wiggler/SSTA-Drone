@@ -1,4 +1,4 @@
-#include "STM32405_config.h"
+#include "SpeedyBee_F405_conf.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include "pid.h"
@@ -83,8 +83,8 @@ int main() {
     // these are NOT represented with quaternions, but roll, pitch, and yaw
     angular_velocity_t current_angular_v = {0.0f, 0.0f, 0.0f};
 
-    uint8_t* msg = "hello!\n";
-    HAL_UART_Transmit(&huart1, msg, 7, 50);
+    uint8_t* msg = "Im going to cry!\n";
+    HAL_UART_Transmit(&huart1, msg, 17, 50);
 
     // test to set a different roll angle than the setpoint to see the correction take place!
     //writeAngleToVector(0.2f, 0.0f, 0.0f, &current_attitude);

@@ -18,6 +18,7 @@
         "debug.h": "c",
         "stdarg.h": "c",
         "stm32f4xx_hal_conf.h": "c",
-        "hal.h": "c"
+        "hal.h": "c",
+        "speedybee_f405_conf.h": "c"
     }
 }

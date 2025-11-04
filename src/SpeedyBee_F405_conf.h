@@ -3,10 +3,10 @@
  * Thanks to the Betaflight source code for providing this info <3
  */
 
-#ifndef SPEEDYBEEF405V3_PINOUT_H
-#define SPEEDYBEEF405V3_PINOUT_H
+#ifndef SPEEDYBEE_F405V3_CONF_H
+#define SPEEDYBEE_F405V3_CONF_H
 
-#include <stm32f4xx_hal.h>
+#include "stm32f4xx_hal.h"
 
 /* ========== GPIO Pin Definitions ========== */
 

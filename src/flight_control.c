@@ -1,7 +1,6 @@
 #include "flight_control.h"
 #include <stdbool.h>
-#include <stm32f4xx_hal.h>
-#include "STM32405_config.h"
+#include "SpeedyBee_F405_conf.h"
 #include <math.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
