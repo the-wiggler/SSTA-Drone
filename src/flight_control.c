@@ -126,6 +126,42 @@ void FC_LEDInit(void) {
     HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
 }
 
+void BMI270_SPI_Init(void) {
+    // enable clock for SPI1
+    __HAL_RCC_SPI1_CLK_ENABLE();
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+
+    // config the SPI pins
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    // the | is used to configure each pin with the below settings at the same time!
+    GPIO_InitStruct.Pin = SPI1_SCK_PIN | SPI1_MISO_PIN | SPI1_MOSI_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    // config the CS pin
+    GPIO_InitStruct.Pin = GYRO_CS_PIN;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GYRO_CS_PORT, &GPIO_InitStruct);
+    HAL_GPIO_WritePin(GYRO_CS_PORT, GYRO_CS_PIN, GPIO_PIN_SET);
+
+    // config SPI1
+    hspi1.Instance = SPI1;
+    hspi1.Init.Mode = SPI_MODE_MASTER;
+    hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+    hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+    hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;  // CPOL=1
+    hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;       // CPHA=1
+    hspi1.Init.NSS = SPI_NSS_SOFT;
+    hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;  // ~10 MHz
+    hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+    HAL_SPI_Init(&hspi1);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // END BOARD LOGIC
 ////////////////////////////////////////////////////////////////////////////////////////////////////

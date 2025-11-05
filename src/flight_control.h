@@ -1,7 +1,6 @@
 #ifndef FLIGHT_CONTROL_H
 #define FLIGHT_CONTROL_H
 
-
 typedef struct {
     float w;        // scalar part of the quaternion
     float i, j, k;  // vector parts of the quaternion
@@ -34,4 +33,7 @@ void setThrottle(throttle_t throttle, motor_throttle_states_t *mts);
 void updateThrottleFromPID(motor_throttle_states_t *mts, orientation_correction_t oc);
 
 void FC_LEDInit(void);
+
+SPI_HandleTypeDef hspi1;
+void BMI270_SPI_Init(void);
 #endif

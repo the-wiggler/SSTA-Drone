@@ -1,6 +1,7 @@
 #include "debug.h"
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 
 void debugInit(void) {
     __HAL_RCC_USART1_CLK_ENABLE();
@@ -24,6 +25,14 @@ void debugInit(void) {
     HAL_UART_Init(&huart1);
 }
 
-void debugPrint() {
-    
+void debugPrint(const char *format, ...) {
+    char buffer[128];
+    va_list args;
+
+    va_start(args, format);
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+
+    // transmit the message
+    HAL_UART_Transmit(&huart1, (uint8_t *)buffer, strlen(buffer), 100);
 }
