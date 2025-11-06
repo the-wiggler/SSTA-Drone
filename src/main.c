@@ -40,8 +40,8 @@ double timeSinceStart() {
 // GLOBAL VARS
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// stores the raw sensor data gathered by the onboard BMI270
-BMI270_raw_data_t sensor_data = {0};
+// stores the raw sensor data gathered by the onboard BMP270
+BMP270_raw_data_t BMP270_sensor_data = {0};
 
 // PID error state storage
 PID_errors_t attitude_errors = {
@@ -79,7 +79,7 @@ int main() {
     bool system_fail = false;
     initTimer();
     FC_LEDInit();
-    BMI270_SPIInit();
+    BMP270_SPIInit();
     debugInit();
     // throttle_states holds the initial throttle values sent to the motors. Each value inside of
     // this variable should be changed by the PID control so each motor has a different throttlel
@@ -105,12 +105,7 @@ int main() {
     // flight control loop
     while (!system_fail) {
         // before anything, sensor data from the onboard accelerometer and gyroscope are gathered
-        if (BMI270_ReadSensorData(&sensor_data) == HAL_OK) {
-            // sensor_data now contains (assming HAL is OK!):
-            // sensor_data.acc_roll, sensor_data.acc_pitch, sensor_data.acc_yaw (angular velocity)
-            // sensor_data.gyr_roll, sensor_data.gyr_pitch, sensor_data.gyr_yaw (attitude)
-            // sensor_data.timestamp
-        }
+        BMP270_ReadSensorData(&BMP270_sensor_data);
 
         //HAL_GPIO_TogglePin(LED_PORT, LED_PIN);
         // at the beginning, we start with what the initial throttle input value is
@@ -132,8 +127,9 @@ int main() {
 
         // TO DO: output motor values via PWM
         // setMotorPWM(throttle_states);
+        debugPrint("Roll: %d  Pitch: %d  Yaw: %d\r\n", BMP270_sensor_data.omega_roll, BMP270_sensor_data.gyr_pitch, BMP270_sensor_data.gyr_yaw);
 
-        HAL_Delay(100);
+        HAL_Delay(500);
     }
     
     return 0;

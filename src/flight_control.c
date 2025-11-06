@@ -126,7 +126,7 @@ void FC_LEDInit(void) {
     HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
 }
 
-void BMI270_SPIInit(void) {
+void BMP270_SPIInit(void) {
     // enable clock for SPI1
     __HAL_RCC_SPI1_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -162,32 +162,59 @@ void BMI270_SPIInit(void) {
     HAL_SPI_Init(&hspi1);
 }
 
-HAL_StatusTypeDef BMI270_ReadSensorData(BMI270_raw_data_t *data) {
-    HAL_StatusTypeDef status;
-    uint8_t buffer[12]; // 12 long
-    uint8_t addr = BMI270_ACC_X_LSB | 0x80;  // Set MSB to 1 for read operation
+static uint8_t BMP270_ReadRegister(uint8_t reg_addr) {
+    uint8_t tx_buffer[2] = {reg_addr | 0x80, 0x00};
+    uint8_t rx_buffer[2] = {0x00, 0x00};
     
-    // set CS to low to select the device
+    // set CS to low to select sensor
     HAL_GPIO_WritePin(GYRO_CS_PORT, GYRO_CS_PIN, GPIO_PIN_RESET);
     
-    // read 12 consecutive bytes starting from accel X LSB
-    status = HAL_SPI_Receive(&hspi1, buffer, 12, HAL_MAX_DELAY);
+    // send register address and receive data
+    HAL_SPI_TransmitReceive(&hspi1, tx_buffer, rx_buffer, 2, 100);
     
-    // set CS to high to deselect
+    // set CS to high to deselect sensor
     HAL_GPIO_WritePin(GYRO_CS_PORT, GYRO_CS_PIN, GPIO_PIN_SET);
     
-    if (status == HAL_OK) {
-        // write the accelerometer data to memory
-        data->acc_roll =    (int16_t)(buffer[1]  << 8 | buffer[0]);
-        data->acc_pitch =   (int16_t)(buffer[3]  << 8 | buffer[2]);
-        data->acc_yaw =     (int16_t)(buffer[5]  << 8 | buffer[4]);
-        data->gyr_roll =    (int16_t)(buffer[7]  << 8 | buffer[6]);
-        data->gyr_pitch =   (int16_t)(buffer[9]  << 8 | buffer[8]);
-        data->gyr_yaw =     (int16_t)(buffer[11] << 8 | buffer[10]);
-        data->timestamp = HAL_GetTick();
+    return rx_buffer[1];
+}
+
+
+// main function to read all sensor data
+HAL_StatusTypeDef BMP270_ReadSensorData(BMP270_raw_data_t *data) {
+    if (data == NULL) {
+        return HAL_ERROR;
     }
     
-    return status;
+    // read accelerometer data
+    uint8_t acc_x_lsb = BMP270_ReadRegister(BMI270_ACCEL_X_LSB);
+    uint8_t acc_x_msb = BMP270_ReadRegister(BMI270_ACCEL_X_MSB);
+    data->acc_roll = (int16_t)(acc_x_msb << 8 | acc_x_lsb);
+    
+    uint8_t acc_y_lsb = BMP270_ReadRegister(BMI270_ACCEL_Y_LSB);
+    uint8_t acc_y_msb = BMP270_ReadRegister(BMI270_ACCEL_Y_MSB);
+    data->acc_pitch = (int16_t)(acc_y_msb << 8 | acc_y_lsb);
+    
+    uint8_t acc_z_lsb = BMP270_ReadRegister(BMI270_ACCEL_Z_LSB);
+    uint8_t acc_z_msb = BMP270_ReadRegister(BMI270_ACCEL_Z_MSB);
+    data->acc_yaw = (int16_t)(acc_z_msb << 8 | acc_z_lsb);
+    
+    // read gyroscope data
+    uint8_t gyr_x_lsb = BMP270_ReadRegister(BMI270_GYRO_X_LSB);
+    uint8_t gyr_x_msb = BMP270_ReadRegister(BMI270_GYRO_X_MSB);
+    data->omega_roll = (int16_t)(gyr_x_msb << 8 | gyr_x_lsb);
+    
+    uint8_t gyr_y_lsb = BMP270_ReadRegister(BMI270_GYRO_Y_LSB);
+    uint8_t gyr_y_msb = BMP270_ReadRegister(BMI270_GYRO_Y_MSB);
+    data->gyr_pitch = (int16_t)(gyr_y_msb << 8 | gyr_y_lsb);
+    
+    uint8_t gyr_z_lsb = BMP270_ReadRegister(BMI270_GYRO_Z_LSB);
+    uint8_t gyr_z_msb = BMP270_ReadRegister(BMI270_GYRO_Z_MSB);
+    data->gyr_yaw = (int16_t)(gyr_z_msb << 8 | gyr_z_lsb);
+    
+    // get current system timestamp
+    data->timestamp = HAL_GetTick();
+    
+    return HAL_OK;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

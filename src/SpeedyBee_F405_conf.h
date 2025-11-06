@@ -6,7 +6,7 @@
 #ifndef SPEEDYBEE_F405V3_CONF_H
 #define SPEEDYBEE_F405V3_CONF_H
 
-#include "stm32f4xx_hal.h"
+#include <stm32f4xx_hal.h>
 
 /* ========== GPIO Pin Definitions ========== */
 

@@ -1,15 +1,19 @@
 #ifndef FLIGHT_CONTROL_H
 #define FLIGHT_CONTROL_H
 
+#include <stdio.h>
+#include <stdint.h>
+#include "SpeedyBee_F405_conf.h"
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // STRUCTS
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef struct {
-    int16_t acc_roll, acc_pitch, acc_yaw;   // the angular acceleration data taken from the BMI270
-    int16_t gyr_roll, gyr_pitch, gyr_yaw;   // the attitude data taken from the BMI270
+    int16_t acc_roll, acc_pitch, acc_yaw;   // the linear acceleration parallel to each axis
+    int16_t omega_roll, gyr_pitch, gyr_yaw; // the angular acceleration about each axis
     uint32_t timestamp;  // should be obtained from HAL_GetTick()
-} BMI270_raw_data_t;
+} BMP270_raw_data_t;
 
 typedef struct {
     float w;        // scalar part of the quaternion
@@ -49,57 +53,32 @@ void updateThrottleFromPID(motor_throttle_states_t *mts, orientation_correction_
 void FC_LEDInit(void);
 
 SPI_HandleTypeDef hspi1;
-void BMI270_SPIInit(void);
-HAL_StatusTypeDef BMI270_ReadSensorData(BMI270_raw_data_t *data);
+void BMP270_SPIInit(void);
+HAL_StatusTypeDef BMP270_ReadSensorData(BMP270_raw_data_t *data);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // REGISTER DEFINITIONS
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////
-// BMI270 REGISTERS       //
+// BMP270 REGISTERS       //
 ////////////////////////////
-// source: https://cdn.sparkfun.com/assets/9/a/2/9/6/bst-bmi270-ds000.pdf
+// source: https://cdn.sparkfun.com/assets/9/a/2/9/6/bst-BMP270-ds000.pdf
+#define BMI270_ACCEL_X_LSB    0x0C
+#define BMI270_ACCEL_X_MSB    0x0D
+#define BMI270_ACCEL_Y_LSB    0x0E
+#define BMI270_ACCEL_Y_MSB    0x0F
+#define BMI270_ACCEL_Z_LSB    0x10
+#define BMI270_ACCEL_Z_MSB    0x11
+#define BMI270_GYRO_X_LSB     0x12
+#define BMI270_GYRO_X_MSB     0x13
+#define BMI270_GYRO_Y_LSB     0x14
+#define BMI270_GYRO_Y_MSB     0x15
+#define BMI270_GYRO_Z_LSB     0x16
+#define BMI270_GYRO_Z_MSB     0x17
 
-// Register Addresses (from BMI270 datasheet, Table 2)
-#define BMI270_CHIP_ID              0x00
-#define BMI270_STATUS               0x03  // status information
 
-// accelerometer data
-#define BMI270_ACC_X_LSB            0x0C
-#define BMI270_ACC_X_MSB            0x0D
-#define BMI270_ACC_Y_LSB            0x0E
-#define BMI270_ACC_Y_MSB            0x0F
-#define BMI270_ACC_Z_LSB            0x10
-#define BMI270_ACC_Z_MSB            0x11
 
-// gyroscope data
-#define BMI270_GYR_X_LSB            0x12
-#define BMI270_GYR_X_MSB            0x13
-#define BMI270_GYR_Y_LSB            0x14
-#define BMI270_GYR_Y_MSB            0x15
-#define BMI270_GYR_Z_LSB            0x16
-#define BMI270_GYR_Z_MSB            0x17
-
-// temperatuer registers
-#define BMI270_TEMP_LSB             0x20
-#define BMI270_TEMP_MSB             0x21
-
-// configuration registers
-#define BMI270_ACC_CONF             0x40  // accelerometer configuration
-#define BMI270_GYR_CONF             0x42  // gyroscope configuration
-#define BMI270_INT_MAP_DATA         0x58  // interrupt mapping for data ready
-#define BMI270_INT_IO_CONF          0x53  // interrupt pin configuration
-#define BMI270_FIFO_WATERMARK       0x4E  // FIFO watermark level
-
-// FIFO registers
-#define BMI270_FIFO_LENGTH_LSB      0x24
-#define BMI270_FIFO_LENGTH_MSB      0x25
-#define BMI270_FIFO_DATA            0x26  // FIFO output data register
-
-// power mode registers
-#define BMI270_PWR_CONF             0x7C  // power configuration
-#define BMI270_PWR_CTRL             0x7D  // power control
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // END
