@@ -35,6 +35,14 @@ double timeSinceStart() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // END HELPER FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// GLOBAL VARS
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// stores the raw sensor data gathered by the onboard BMI270
+BMI270_raw_data_t sensor_data = {0};
+
 // PID error state storage
 PID_errors_t attitude_errors = {
     .current_error  = {1.0f, 0.0f, 0.0f, 0.0f},
@@ -42,6 +50,7 @@ PID_errors_t attitude_errors = {
     .integral       = {0.0f, 0.0f, 0.0f, 0.0f},
     .previous_time  = 0.0f
 };
+// PID error state storage
 PID_rate_errors_t rate_errors = {
     .current_error_roll = 0.0f,
     .current_error_pitch = 0.0f,
@@ -54,6 +63,10 @@ PID_rate_errors_t rate_errors = {
     .integral_yaw = 0.0f,
     .previous_time = 0.0f
 };
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// END GLOBAL VARS
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*///
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -66,6 +79,7 @@ int main() {
     bool system_fail = false;
     initTimer();
     FC_LEDInit();
+    BMI270_SPIInit();
     debugInit();
     // throttle_states holds the initial throttle values sent to the motors. Each value inside of
     // this variable should be changed by the PID control so each motor has a different throttlel
@@ -90,6 +104,14 @@ int main() {
     
     // flight control loop
     while (!system_fail) {
+        // before anything, sensor data from the onboard accelerometer and gyroscope are gathered
+        if (BMI270_ReadSensorData(&sensor_data) == HAL_OK) {
+            // sensor_data now contains (assming HAL is OK!):
+            // sensor_data.acc_roll, sensor_data.acc_pitch, sensor_data.acc_yaw (angular velocity)
+            // sensor_data.gyr_roll, sensor_data.gyr_pitch, sensor_data.gyr_yaw (attitude)
+            // sensor_data.timestamp
+        }
+
         //HAL_GPIO_TogglePin(LED_PORT, LED_PIN);
         // at the beginning, we start with what the initial throttle input value is
         setThrottle(100, &throttle_states); // sets all values in throttle_states to a value

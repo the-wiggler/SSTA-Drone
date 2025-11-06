@@ -126,7 +126,7 @@ void FC_LEDInit(void) {
     HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
 }
 
-void BMI270_SPI_Init(void) {
+void BMI270_SPIInit(void) {
     // enable clock for SPI1
     __HAL_RCC_SPI1_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -154,12 +154,40 @@ void BMI270_SPI_Init(void) {
     hspi1.Init.Mode = SPI_MODE_MASTER;
     hspi1.Init.Direction = SPI_DIRECTION_2LINES;
     hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
-    hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;  // CPOL=1
-    hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;       // CPHA=1
+    hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
+    hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
     hspi1.Init.NSS = SPI_NSS_SOFT;
     hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;  // ~10 MHz
     hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
     HAL_SPI_Init(&hspi1);
+}
+
+HAL_StatusTypeDef BMI270_ReadSensorData(BMI270_raw_data_t *data) {
+    HAL_StatusTypeDef status;
+    uint8_t buffer[12]; // 12 long
+    uint8_t addr = BMI270_ACC_X_LSB | 0x80;  // Set MSB to 1 for read operation
+    
+    // set CS to low to select the device
+    HAL_GPIO_WritePin(GYRO_CS_PORT, GYRO_CS_PIN, GPIO_PIN_RESET);
+    
+    // read 12 consecutive bytes starting from accel X LSB
+    status = HAL_SPI_Receive(&hspi1, buffer, 12, HAL_MAX_DELAY);
+    
+    // set CS to high to deselect
+    HAL_GPIO_WritePin(GYRO_CS_PORT, GYRO_CS_PIN, GPIO_PIN_SET);
+    
+    if (status == HAL_OK) {
+        // write the accelerometer data to memory
+        data->acc_roll =    (int16_t)(buffer[1]  << 8 | buffer[0]);
+        data->acc_pitch =   (int16_t)(buffer[3]  << 8 | buffer[2]);
+        data->acc_yaw =     (int16_t)(buffer[5]  << 8 | buffer[4]);
+        data->gyr_roll =    (int16_t)(buffer[7]  << 8 | buffer[6]);
+        data->gyr_pitch =   (int16_t)(buffer[9]  << 8 | buffer[8]);
+        data->gyr_yaw =     (int16_t)(buffer[11] << 8 | buffer[10]);
+        data->timestamp = HAL_GetTick();
+    }
+    
+    return status;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
